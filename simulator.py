@@ -4,6 +4,8 @@ from processor import Processor
 from msi_cache import MsiCache
 from debug import debug_instr
 
+BLOCKED = True
+DONE = None
 LOAD = '0'
 STORE = '1'
 OTHER = '2'
@@ -34,16 +36,19 @@ class Simulator():
         done = [False] * len(self.processors)
         while not all(done):
             for p in self.processors:
+                # don't do anything if this processor has completed
                 if done[p.pn]:
                     continue
 
                 ic, ity, maddr = p.fetch_instr() # advance by 1 cycle
 
-                if ity is None:
+                # the processor has completed all instructions
+                if ity is DONE:
                     done[p.pn] = True
                     continue
 
-                if ity == True:
+                # processor is blocked on something
+                if ity == BLOCKED:
                     continue
 
                 mem_addr = int(maddr, 16)
