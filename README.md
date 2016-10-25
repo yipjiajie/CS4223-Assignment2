@@ -30,3 +30,15 @@ What works now is
 ```
 ./coherence MSI testdata 1024 1 16
 ```
+
+## TODO
+Validate that MSI actually works
+Implement MESI and Dragon
+More stats:
+
+1. Data cache miss rate for each core
+2. Amount of Data traffic in bytes on the bus (this is due to bus read, bus write, and bus update transactions)
+3. Number of invalidations or updates on the bus
+4. Distribution of accesses to private data versus shared data (for example, access to modified state is private, while access to shared state is shared data)
+5. Average write latency
+6. Execution Cycles (different core will complete at different cycles; report the maximum value across all cores)
