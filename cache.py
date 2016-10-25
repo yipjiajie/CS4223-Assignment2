@@ -1,19 +1,7 @@
 from math import log
+from msi_cache_block import CacheBlock
 
 def log2(x): return int(log(x, 2))
-
-class ReadMiss(Exception):
-    pass
-
-class WriteMiss(Exception):
-    pass
-
-class CacheLine():
-    def __init__(self):
-        self.valid = False
-        self.dirty = False
-        self.tag = None
-        self.data = []
 
 class Cache():
     def __init__(self, cache_size, assoc, block_size):
@@ -22,8 +10,8 @@ class Cache():
         self.block_size = block_size # number of bytes
         self.word_size = 4 # fixed
 
-        self.n_words_in_block = self.block_size / self.word_size
-        self.n_blocks = self.cache_size / self.block_size
+        self.n_words_in_block = self.block_size // self.word_size
+        self.n_blocks = self.cache_size // self.block_size
 
         self.n_bits_offset = log2(self.block_size)
         self.n_bits_index = log2(self.n_blocks)
@@ -32,9 +20,10 @@ class Cache():
         self.offset_mask = int(pow(2, self.n_bits_offset)) - 1
         self.index_mask = int(pow(2, self.n_bits_index)) - 1
 
-        self._cache = [
-            CacheLine() for i in range(self.n_blocks)
-            ]
+        self._cache = self.init_cache_blocks()
+
+    def init_cache_blocks(self):
+        return []
 
     def offset(self, mem_addr):
         return mem_addr & self.offset_mask
@@ -45,35 +34,25 @@ class Cache():
     def tag(self, mem_addr):
         return mem_addr >> (self.n_bits_offset + self.n_bits_index)
 
-    def cache_line(self, mem_addr):
+    def cache_block(self, mem_addr):
+        """Get cache bock responsible for this memory address"""
         return self._cache[self.index(mem_addr)]
 
-    def read(self, mem_addr):
-        cache_line = self.cache_line(mem_addr)
-        if cache_line.valid:
-            if cache_line.tag == self.tag(mem_addr):
-                # cache hit
-                return None
-            else:
-                # tag mismatch
-                # need to load and update tag
-                # check dirty bit and write
-                raise ReadMiss('tag mismatch')
-        else:
-            # cold miss
-            # need to load and set valid and tag
-            raise ReadMiss('cache line invalid')
+    def processor_action(self, event, mem_addr):
+        """Respond to a processor action.
 
-    def write(self, mem_addr):
-        cache_line = self.cache_line(mem_addr)
-        if cache_line.valid:
-            if cache_line.tag == self.tag(mem_addr):
-                # can write to offset
-                cache_line.dirty = True
-                return None
-            else:
-                # write-allocate
-                raise WriteMiss('tag mismatch')
-        else:
-            # write-allocate
-            raise WriteMiss('cache line invalid')
+        Returns bus_txn:
+            the name of bus event triggered
+        """
+        cache_block = self.cache_block(mem_addr)
+        return cache_block.react_to(event)
+
+    def bus_action(self, event, mem_addr):
+        """Respond to a bus snoop action
+
+        Returns (snoop, cycles to block):
+            snoop is a boolean indicating if the cache block snooped this event
+            cycles to block indicates cycles that the cache controll is blocked
+        """
+        cache_block = self.cache_block(mem_addr)
+        return cache_block.react_to(event)

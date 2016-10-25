@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import reader
+from simulator import Simulator
 
 # read command line args in this format
 # coherence “protocol” “input_file” “cache_size” “associativity” “block_size”
@@ -12,6 +12,10 @@ if len(sys.argv) != 6:
 
 _, protocol, input_file, cache_size, associativity, block_size = sys.argv
 
-print(input_file)
-
-reader.read_files(input_file)
+print(Simulator(
+    protocol,
+    input_file,
+    cache_size,
+    associativity,
+    block_size
+    ).simulate())
