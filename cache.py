@@ -4,7 +4,8 @@ from msi_cache_block import CacheBlock
 def log2(x): return int(log(x, 2))
 
 class Cache():
-    def __init__(self, cache_size, assoc, block_size):
+    def __init__(self, cache_size, assoc, block_size, pn):
+        self.id = pn
         self.cache_size = cache_size # number of bytes
         self.assoc = assoc
         self.block_size = block_size # number of bytes
@@ -20,7 +21,7 @@ class Cache():
         self.offset_mask = int(pow(2, self.n_bits_offset)) - 1
         self.index_mask = int(pow(2, self.n_bits_index)) - 1
 
-        self._cache = self.init_cache_blocks()
+        self._cache = self.init_cache_blocks(self.id)
 
     def init_cache_blocks(self):
         return []

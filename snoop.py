@@ -2,12 +2,15 @@ class Snoop():
     def __init__(self, caches):
         self.caches = caches
 
-    def respond_to(self, bus_txn, mem_addr):
+    def respond_to(self, bus_txn, mem_addr, origin):
         if bus_txn is None:
             return 0
         any_snoop = False
         cmax = 0
         for c in self.caches:
+            if c.id == origin:
+                continue
+
             snoop, cycles = c.bus_action(bus_txn, mem_addr)
             if snoop:
                 cmax = max(cmax, cycles)

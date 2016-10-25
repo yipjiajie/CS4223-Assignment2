@@ -26,7 +26,6 @@ class Processor():
             # no instructions, processor is done
             return None, None
         else:
-            self.cycle += 1
             instr = self.instructions[self.ic]
             ty, mem = instr.split()
             self.ic += 1
