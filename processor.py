@@ -17,19 +17,19 @@ class Processor():
         if self.compute_for_cycles > 0:
             self.cycle += 1
             self.compute_for_cycles -= 1
-            return True, None
+            return None, True, None
         elif self.memory_access_cycles > 0:
             self.cycle += 1
             self.memory_access_cycles -= 1
-            return True, None
+            return None, True, None
         elif self.ic >= len(self.instructions):
             # no instructions, processor is done
-            return None, None
+            return None, None, None
         else:
             instr = self.instructions[self.ic]
             ty, mem = instr.split()
             self.ic += 1
-            return (ty, mem)
+            return (self.ic-1, ty, mem)
 
     def compute_for(self, cycles):
         self.compute_for_cycles = cycles

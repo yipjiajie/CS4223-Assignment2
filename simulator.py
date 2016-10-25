@@ -37,7 +37,7 @@ class Simulator():
                 if done[p.pn]:
                     continue
 
-                ity, maddr = p.fetch_instr() # advance by 1 cycle
+                ic, ity, maddr = p.fetch_instr() # advance by 1 cycle
 
                 if ity is None:
                     done[p.pn] = True
@@ -50,16 +50,16 @@ class Simulator():
                 if ity == LOAD:
                     bus_txn = p.cache.processor_action(PrRd, mem_addr)
                     cycles_needed = self.snoop.respond_to(bus_txn, mem_addr, p.cache.id)
-                    debug_instr(p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed)
+                    debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed, mem_addr)
                     p.memory_access_for(cycles_needed)
                 elif ity == STORE:
                     bus_txn = p.cache.processor_action(PrWr, mem_addr)
                     cycles_needed = self.snoop.respond_to(bus_txn, mem_addr, p.cache.id)
-                    debug_instr(p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed)
+                    debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed, mem_addr)
                     p.memory_access_for(cycles_needed)
                 elif ity == OTHER:
                     num_cycles = mem_addr
-                    debug_instr(p.pn, ity, p.cache.index(mem_addr), None, num_cycles)
+                    debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), None, num_cycles, mem_addr)
                     p.compute_for(num_cycles)
         for p in self.processors:
             print(p.get_summary())
