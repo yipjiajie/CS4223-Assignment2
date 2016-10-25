@@ -53,18 +53,25 @@ class Simulator():
 
                 mem_addr = int(maddr, 16)
                 if ity == LOAD:
+                    # ask cache controller how we should respond to this action
                     bus_txn = p.cache.processor_action(PrRd, mem_addr)
+                    # give all other caches a chance to snoop
                     cycles_needed = self.snoop.respond_to(bus_txn, mem_addr, p.cache.id)
                     debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed, mem_addr)
+                    # tell the processor to block for some cycles
                     p.memory_access_for(cycles_needed)
                 elif ity == STORE:
+                    # ask cache controller how we should respond to this action
                     bus_txn = p.cache.processor_action(PrWr, mem_addr)
+                    # give all other caches a chance to snoop
                     cycles_needed = self.snoop.respond_to(bus_txn, mem_addr, p.cache.id)
                     debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed, mem_addr)
+                    # tell the processor to block for some cycles
                     p.memory_access_for(cycles_needed)
                 elif ity == OTHER:
                     num_cycles = mem_addr
                     debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), None, num_cycles, mem_addr)
+                    # tell processor to block for some cycles for computation
                     p.compute_for(num_cycles)
         for p in self.processors:
             print(p.get_summary())
