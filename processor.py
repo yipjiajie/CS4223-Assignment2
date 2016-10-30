@@ -31,11 +31,28 @@ class Processor():
             self.ic += 1
             return (self.ic-1, ty, mem)
 
-    def compute_for(self, cycles):
-        self.compute_for_cycles = cycles
+    def tick(self):
+        if self.cache.is_blocked():
+            self.cycle += 1
+            return
 
-    def memory_access_for(self, cycles):
-        self.memory_access_cycles = cycles
+        elif self.compute_for_cycles > 0:
+            self.compute_for_cycles -= 1
+            self.cycle += 1
+            return
+
+        elif self.ic >= len(self.instructions):
+            return True
+
+        instr = self.instructions[self.ic]
+        ty, mem = instr.split()
+
+        if ty == '2':
+            self.compute_for_cycles = int(mem, 16)
+            self.ic += 1
+
+        self.ic += 1
+        return (self.ic-1, ty, mem)
 
     def get_summary(self):
         return {

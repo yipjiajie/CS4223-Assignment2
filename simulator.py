@@ -1,16 +1,10 @@
 from cache import Cache
-from snoop import Snoop
+from snoop import Snoop, BusTxn
 from processor import Processor
 from msi_cache import MsiCache
-from debug import debug_instr
+from debug import debug_bus_txn, debug_instr_pre, debug_stalls
+from constants import *
 
-BLOCKED = True
-DONE = None
-LOAD = '0'
-STORE = '1'
-OTHER = '2'
-PrRd = 'PrRd'
-PrWr = 'PrWr'
 
 class Simulator():
     def __init__(
@@ -34,45 +28,41 @@ class Simulator():
     def simulate(self):
         print("simulating...")
         done = [False] * len(self.processors)
+
         while not all(done):
             for p in self.processors:
-                # don't do anything if this processor has completed
-                if done[p.pn]:
+                res = p.tick()
+
+                if res is None: # processor doing some compute or cache blocked
                     continue
 
-                ic, ity, maddr = p.fetch_instr() # advance by 1 cycle
-
-                # the processor has completed all instructions
-                if ity is DONE:
+                if res is True: # processor is done!
                     done[p.pn] = True
                     continue
 
-                # processor is blocked on something
-                if ity == BLOCKED:
-                    continue
+                ic, itype, maddr = res
+
+                if itype == LOAD:
+                    pa = PrRd
+                else:
+                    pa = PrWr
 
                 mem_addr = int(maddr, 16)
-                if ity == LOAD:
-                    # ask cache controller how we should respond to this action
-                    bus_txn = p.cache.processor_action(PrRd, mem_addr)
-                    # give all other caches a chance to snoop
-                    cycles_needed = self.snoop.respond_to(bus_txn, mem_addr, p.cache.id)
-                    debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed, mem_addr)
-                    # tell the processor to block for some cycles
-                    p.memory_access_for(cycles_needed)
-                elif ity == STORE:
-                    # ask cache controller how we should respond to this action
-                    bus_txn = p.cache.processor_action(PrWr, mem_addr)
-                    # give all other caches a chance to snoop
-                    cycles_needed = self.snoop.respond_to(bus_txn, mem_addr, p.cache.id)
-                    debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), bus_txn, cycles_needed, mem_addr)
-                    # tell the processor to block for some cycles
-                    p.memory_access_for(cycles_needed)
-                elif ity == OTHER:
-                    num_cycles = mem_addr
-                    debug_instr(ic, p.pn, ity, p.cache.index(mem_addr), None, num_cycles, mem_addr)
-                    # tell processor to block for some cycles for computation
-                    p.compute_for(num_cycles)
+
+                debug_instr_pre(ic, p.pn, itype, p.cache.index(mem_addr), mem_addr)
+
+                bus_txn = p.cache.processor_action(pa, mem_addr)
+
+                debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
+
+                self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr))
+
+            self.snoop.tick()
+
         for p in self.processors:
             print(p.get_summary())
+            print(p.cache.get_summary())
+
+        print(self.snoop.get_summary())
+
         return 'Done'
