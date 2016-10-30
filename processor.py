@@ -12,25 +12,6 @@ class Processor():
         # cycles remaming for some memory operation
         self.memory_access_cycles = 0
 
-    def fetch_instr(self):
-        # process is doing computation
-        if self.compute_for_cycles > 0:
-            self.cycle += 1
-            self.compute_for_cycles -= 1
-            return None, True, None
-        elif self.memory_access_cycles > 0:
-            self.cycle += 1
-            self.memory_access_cycles -= 1
-            return None, True, None
-        elif self.ic >= len(self.instructions):
-            # no instructions, processor is done
-            return None, None, None
-        else:
-            instr = self.instructions[self.ic]
-            ty, mem = instr.split()
-            self.ic += 1
-            return (self.ic-1, ty, mem)
-
     def tick(self):
         if self.cache.is_blocked():
             self.cycle += 1
@@ -47,12 +28,11 @@ class Processor():
         instr = self.instructions[self.ic]
         ty, mem = instr.split()
 
-        if ty == '2':
-            self.compute_for_cycles = int(mem, 16)
-            self.ic += 1
-
         self.ic += 1
         return (self.ic-1, ty, mem)
+
+    def compute_for(self, cycles):
+        self.compute_for_cycles += cycles
 
     def get_summary(self):
         return {

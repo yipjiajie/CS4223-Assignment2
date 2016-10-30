@@ -41,15 +41,19 @@ class Simulator():
                     continue
 
                 ic, itype, maddr = res
-
-                if itype == LOAD:
-                    pa = PrRd
-                else:
-                    pa = PrWr
-
                 mem_addr = int(maddr, 16)
 
                 debug_instr_pre(ic, p.pn, itype, p.cache.index(mem_addr), mem_addr)
+
+                if itype == OTHER:
+                    p.compute_for(mem_addr)
+                    continue
+                elif itype == LOAD:
+                    pa = PrRd
+                elif itype == STORE:
+                    pa = PrWr
+                else:
+                    raise Exception('Unknown instruction')
 
                 bus_txn = p.cache.processor_action(pa, mem_addr)
 
