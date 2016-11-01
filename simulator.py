@@ -26,7 +26,6 @@ class Simulator():
         self.snoop = Snoop(self.caches)
 
     def simulate(self):
-        print("simulating...")
         done = [False] * len(self.processors)
 
         while not all(done):
@@ -47,6 +46,7 @@ class Simulator():
 
                 if itype == OTHER:
                     p.compute_for(mem_addr)
+                    p.proceed()
                     continue
                 elif itype == LOAD:
                     pa = PrRd
@@ -55,15 +55,18 @@ class Simulator():
                 else:
                     raise Exception('Unknown instruction')
 
-                bus_txn = p.cache.processor_action(pa, mem_addr)
+                bus_txn, cycles = p.cache.processor_action(pa, mem_addr)
 
                 debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
 
-                self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr))
+                self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles))
 
-            self.snoop.tick()
+            p_proceed = self.snoop.tick()
+            for pn in p_proceed:
+                self.processors[pn].proceed()
 
         for p in self.processors:
+            print('=== Summary for processor %s ===' % p.pn)
             print(p.get_summary())
             print(p.cache.get_summary())
 

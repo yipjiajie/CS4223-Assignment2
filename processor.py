@@ -11,8 +11,10 @@ class Processor():
         self.compute_for_cycles = 0
         # cycles remaming for some memory operation
         self.memory_access_cycles = 0
+        self.ticks = 0
 
     def tick(self):
+        self.ticks += 1
         if self.cache.is_blocked():
             self.cycle += 1
             return
@@ -28,8 +30,10 @@ class Processor():
         instr = self.instructions[self.ic]
         ty, mem = instr.split()
 
+        return (self.ic, ty, mem)
+
+    def proceed(self):
         self.ic += 1
-        return (self.ic-1, ty, mem)
 
     def compute_for(self, cycles):
         self.compute_for_cycles += cycles
@@ -37,4 +41,5 @@ class Processor():
     def get_summary(self):
         return {
             'cycles': self.cycle,
+            'ticks': self.ticks,
         }

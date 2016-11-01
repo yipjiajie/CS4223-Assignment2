@@ -13,20 +13,20 @@ PRWR = 'PrWr'
 
 STATE_MACHINE = {
     INVALID: {
-        PRRD: (SHARED, BUSRD),
-        PRWR: (MODIFIED, BUSRDX),
+        PRRD: (SHARED, BUSRD, 100),
+        PRWR: (MODIFIED, BUSRDX, 100),
         BUSRD: (INVALID, False, 0),
         BUSRDX: (INVALID, False, 0),
     },
     SHARED: {
-        PRRD:(SHARED, None),
-        PRWR: (MODIFIED, BUSRDX),
+        PRRD:(SHARED, None, 0),
+        PRWR: (MODIFIED, BUSRDX, 0),
         BUSRD: (SHARED, False, 0),
         BUSRDX: (INVALID, False, 0),
     },
     MODIFIED: {
-        PRRD: (MODIFIED, None),
-        PRWR: (MODIFIED, None),
+        PRRD: (MODIFIED, None, 0),
+        PRWR: (MODIFIED, None, 0),
         BUSRD: (SHARED, True, 100),
         BUSRDX: (INVALID, True, 100),
     },
@@ -41,6 +41,8 @@ class CacheBlock():
         self.next_state_to_commit = None
         self.hits = 0
         self.misses = 0
+        self.private_access = 0
+        self.shared_access = 0
 
     def step(self, event, origin=None):
         old_state = self.state
@@ -50,18 +52,15 @@ class CacheBlock():
         self.next_state_to_commit = r[0]
         debug_cache_block(
             self.cid, self.id, old_state, event, self.next_state_to_commit, origin)
-        if len(r) == 2:
-            return (old_state, r[1])
-        else:
-            return (old_state, r[1], r[2])
+        return (old_state, r[1], r[2])
 
     def prrd(self, origin=None):
-        self.state, bus_txn = self.step(PRRD)
-        return bus_txn
+        self.state, bus_txn, cycles = self.step(PRRD)
+        return bus_txn, cycles
 
     def prwr(self, origin=None):
-        self.state, bus_txn = self.step(PRWR)
-        return bus_txn
+        self.state, bus_txn, cycles = self.step(PRWR)
+        return bus_txn, cycles
 
     def busrd(self, origin):
         self.state, snoop, cycles = self.step(BUSRD, origin)
@@ -72,10 +71,18 @@ class CacheBlock():
         return snoop, cycles
 
     def processor_action(self, event):
+        # record hits vs misses
         if self.state == INVALID:
             self.misses += 1
         else:
             self.hits += 1
+
+        # record hits vs misses
+        if self.state == SHARED:
+            self.shared_access += 1
+        elif self.state == MODIFIED:
+            self.private_access += 1
+
         # invalid - prwr -> miss
         # invalid - prwr -> miss
         # shared - prrd -> hit
@@ -93,4 +100,9 @@ class CacheBlock():
             self.next_state_to_commit = None
 
     def get_summary(self):
-        return (self.hits, self.misses)
+        return {
+            'hits': self.hits,
+            'misses': self.misses,
+            'shared_access': self.shared_access,
+            'private_access': self.private_access,
+        }

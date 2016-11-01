@@ -76,8 +76,9 @@ class Cache():
             c.commit()
 
     def get_summary(self):
-        summaries = (c.get_summary() for c in self._cache)
-        return (
-                sum(s[0] for s in summaries),
-                sum(s[1] for s in summaries)
-                )
+        summaries = [c.get_summary() for c in self._cache]
+        STATS = ['hits', 'misses', 'shared_access', 'private_access']
+        summary = {
+            stat: sum(s[stat] for s in summaries) for stat in STATS
+        }
+        return summary

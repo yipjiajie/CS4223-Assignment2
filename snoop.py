@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from debug import debug_snoop
 
-BusTxn = namedtuple('BusTxn', ['pn', 'name', 'mem_addr'])
+BusTxn = namedtuple('BusTxn', ['pn', 'name', 'mem_addr', 'cycles'])
 
 class Snoop():
     def __init__(self, caches):
@@ -10,22 +10,30 @@ class Snoop():
         self.txns = []
         self.traffic = 0
         self.num_invalidations = 0
+        self.cycles_to_block = 0
 
     def add_txn(self, txn):
         if txn is not None and txn.name is not None:
             self.txns.append(txn)
 
     def tick(self):
-        self.snoop(self.txns)
+        # tick 1 cycle on the snoop and returns the processors
+        # that are allowed to proceed with their instructions
+        # the other processors are not allowed to proceed
+        if self.cycles_to_block > 0:
+            self.cycles_to_block -= 1
+            for c in self.caches:
+                c.tick()
+            return []
+
+        if not self.txns:
+            return [c.id for c in self.caches]
+
+        r = self.snoop(self.txns)
         self.txns = []
-        for c in self.caches:
-            c.tick()
+        return [r]
 
     def snoop(self, bus_txns):
-        # if there are no bus txn, return nothing
-        if len(bus_txns) == 0:
-            return
-
         # pick 1 to respond to first (for simplicity always choose first)
         print('=== Bus ===')
         print(bus_txns)
@@ -36,8 +44,8 @@ class Snoop():
         self.caches[todo.pn].commit()
 
         # let every other cache to respond to a bus txn
-        max_cycles = 0
-        pn, bt, ma = todo
+        pn, bt, ma, cycles = todo
+        cycles_to_block = cycles
         debug_snoop(pn, bt)
         for c in self.caches:
             if c.id == pn:
@@ -50,16 +58,16 @@ class Snoop():
             # assume that in this x cycles ma gets into pn's cache too
             if cycles > 0:
                 self.num_invalidations += 1
-            max_cycles = max(max_cycles, cycles)
+            cycles_to_block = max(cycles_to_block, cycles)
 
         for c in self.caches:
-            c.block_for(max(max_cycles, memory_responds(bt)))
+            c.block_for(cycles_to_block)
 
-        if (max_cycles > 0):
+        if (cycles_to_block > 0):
+            self.cycles_to_block = cycles_to_block
             self.traffic += 1
+
+        return todo.pn
 
     def get_summary(self):
         return { 'traffic': self.traffic, 'inval': self.num_invalidations }
-
-def memory_responds(bt):
-    return 100
