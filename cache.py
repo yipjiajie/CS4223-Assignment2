@@ -22,10 +22,10 @@ class Cache():
         self.offset_mask = int(pow(2, self.n_bits_offset)) - 1
         self.index_mask = int(pow(2, self.n_bits_index)) - 1
 
-        self._cache = self.init_cache_blocks(self.id)
+        self.cache_sets = self.init_cache_sets(self.id)
         self._blocked_for = 0
 
-    def init_cache_blocks(self):
+    def init_cache_sets(self):
         return []
 
     def offset(self, mem_addr):
@@ -39,7 +39,7 @@ class Cache():
 
     def cache_block(self, mem_addr):
         """Get cache bock responsible for this memory address"""
-        return self._cache[self.index(mem_addr)]
+        return self.cache_sets[self.index(mem_addr)]
 
     def tick(self):
         if self._blocked_for > 0:
@@ -75,7 +75,7 @@ class Cache():
         self.cache_block(ma).commit(ic)
 
     def get_summary(self):
-        summaries = [c.get_summary() for c in self._cache]
+        summaries = [c.get_summary() for c in self.cache_sets]
         STATS = ['hits', 'misses', 'shared_access', 'private_access']
         summary = {
             stat: sum(s[stat] for s in summaries) for stat in STATS
