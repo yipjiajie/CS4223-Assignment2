@@ -30,14 +30,15 @@ class Snoop():
             for c in self.caches:
                 c.tick()
             self.txns = []
-            return []
+            return
 
         if not self.txns:
-            return [c.id for c in self.caches]
+            for c in self.caches:
+                c.processor.proceed()
+            return
 
         r = self.snoop(self.txns)
         self.txns = []
-        return [r]
 
     def snoop(self, bus_txns):
         # pick 1 to respond to first (for simplicity always choose first)
@@ -49,6 +50,9 @@ class Snoop():
 
         # only the transaction that is selected gets to commit to new stage
         self.caches[todo.pn].commit(ma, ic)
+
+        # processor of the cache that is chosen to be committed can proceed
+        self.caches[todo.pn].processor.proceed()
 
         # let every other cache to respond to a bus txn
         cycles_to_block = cycles

@@ -78,9 +78,7 @@ class Simulator():
                 else:
                     self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
 
-            p_proceed = self.snoop.tick()
-            for pn in p_proceed:
-                self.processors[pn].proceed()
+            self.snoop.tick()
 
         for p in self.processors:
             print('=== Summary for processor %s ===' % p.pn)

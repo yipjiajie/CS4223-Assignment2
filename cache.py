@@ -6,6 +6,7 @@ def log2(x): return int(log(x, 2))
 
 class Cache():
     def __init__(self, cache_size, assoc, block_size, pn):
+        self.processor = None
         self.id = pn
         self.cache_size = cache_size # number of bytes
         self.assoc = assoc
@@ -42,7 +43,7 @@ class Cache():
         return self.cache_sets[self.index(mem_addr)]
 
     def cache_block(self, mem_addr):
-        return self.cache_sets[self.index(mem_addr)].find_block(self.tag(mem_addr))
+        return self.cache_set(mem_addr).find_block(self.tag(mem_addr))
 
     def tick(self):
         if self._blocked_for > 0:
@@ -55,17 +56,23 @@ class Cache():
         self._blocked_for += cycles
         debug_cache(self.id, cycles, self._blocked_for)
 
+    def deb(self, st):
+        if self.id == 0:
+            print(st)
+
     def processor_action(self, event, mem_addr):
         """Respond to a processor action.
 
         Returns bus_txn:
             the name of bus event triggered
         """
+        cs = self.cache_set(mem_addr)
+
         cb = self.cache_block(mem_addr)
         if cb:
+            cs.to_commit = cb
             return cb.processor_action(event)
 
-        cs = self.cache_set(mem_addr)
         cb = cs.first_empty()
         if cb:
             cb.next_tag = self.tag(mem_addr)
@@ -73,11 +80,11 @@ class Cache():
             return cb.processor_action(event)
         else:
             # no empty cache block
-            cb = cs.evict()
+            cb, cycles = cs.evict()
             cb.next_tag = self.tag(mem_addr)
             cs.to_commit = cb
 
-            return 'EVICT', 100
+            return 'EVICT', cycles
 
         cache_set = self.cache_set(mem_addr)
         return cache_set.processor_action(event)

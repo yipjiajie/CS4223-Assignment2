@@ -7,6 +7,7 @@ class Processor():
         self.cycle = 0
         self.ic = 0
         self.cache = cache
+        self.cache.processor = self
         # cycles remaining for computation
         self.compute_for_cycles = 0
         # cycles remaming for some memory operation
@@ -35,7 +36,8 @@ class Processor():
         return (self.ic, ty, mem)
 
     def proceed(self):
-        if self.compute_for_cycles == 0 and not self.cache.is_blocked():
+        print('PROCEED : %s', self.pn)
+        if self.compute_for_cycles == 0:
             self.ic += 1
 
     def compute_for(self, cycles):

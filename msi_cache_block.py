@@ -98,7 +98,7 @@ class CacheBlock():
         self.ba = event
         return getattr(self, event.lower())(origin)
 
-    def commit(self, ic):
+    def commit(self, ic, tag):
         current = self.state
         nexts = self.next_state_to_commit
 
@@ -106,9 +106,7 @@ class CacheBlock():
             self.state = self.next_state_to_commit
             self.next_state_to_commit = None
 
-        if self.next_tag:
-            self.tag = self.next_tag
-            self.tag = None
+        self.tag = tag
 
         if self.pa and current == INVALID:
             self.misses += 1

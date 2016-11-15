@@ -1,5 +1,5 @@
 from cache import Cache
-from msi_cache_block import CacheBlock, INVALID
+from msi_cache_block import CacheBlock, INVALID, SHARED
 
 class LRUEviction():
     def __init__(self, members):
@@ -25,6 +25,7 @@ class LRUEviction():
 
 class CacheSet():
     def __init__(self, cache, assoc, i):
+        self.cache = cache
         self.cache_blocks =  [
             CacheBlock(assoc, i)
             for i in range(assoc)
@@ -45,7 +46,8 @@ class CacheSet():
             raise Exception('tomcommit is none')
         else:
             self.lru.use(self.to_commit)
-            self.to_commit.commit(ic)
+            self.to_commit.commit(ic, tag)
+            self.to_commit = None
 
     def find_block(self, tag):
         blocks = [b for b in self.cache_blocks if b.tag == tag]
@@ -63,8 +65,16 @@ class CacheSet():
 
     def evict(self):
         cb = self.lru.evict()
+        if cb.state == INVALID:
+            raise Exception('Should not be invalid here')
+
+        if cb.state == SHARED:
+            cycles = 0
+        else:
+            cycles = 100
+
         cb.reset()
-        return cb
+        return cb, cycles
 
 
 class MsiCache(Cache):
