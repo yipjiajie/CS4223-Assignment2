@@ -76,11 +76,10 @@ class CacheBlock():
         return (old_state, r[1], r[2])
 
     def prrd(self, origin=None):
-        self.cache.is_any_shared(self.id)
         # find out if any other cache has exclusive or modified
         # if so: then i go to shared
         # otherwise i go to exclusive
-        if self.shared:
+        if self.state == INVALID and self.cache.is_any_shared(self.id):
             self.state, bus_txn, cycles = self.step(PRRDS)
         else:
             self.state, bus_txn, cycles = self.step(PRRD)
