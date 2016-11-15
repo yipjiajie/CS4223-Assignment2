@@ -1,12 +1,14 @@
 from collections import namedtuple
 
-from debug import debug_snoop
+from debug import debug_bus, debug_snoop
 
-BusTxn = namedtuple('BusTxn', ['pn', 'name', 'mem_addr', 'cycles'])
+BusTxn = namedtuple('BusTxn', ['pn', 'name', 'mem_addr', 'cycles', 'ic'])
 
 class Snoop():
     def __init__(self, caches):
         self.caches = caches
+        for c in caches:
+            c.snoop = self
         self.txns = []
         self.traffic = 0
         self.num_invalidations = 0
@@ -24,9 +26,11 @@ class Snoop():
             self.cycles_to_block -= 1
             for c in self.caches:
                 c.tick()
+            self.txns = []
             return []
 
         if not self.txns:
+            print("NO SELF TXNS")
             return [c.id for c in self.caches]
 
         r = self.snoop(self.txns)
@@ -35,16 +39,16 @@ class Snoop():
 
     def snoop(self, bus_txns):
         # pick 1 to respond to first (for simplicity always choose first)
-        print('=== Bus ===')
-        print(bus_txns)
+        debug_bus(bus_txns)
 
         todo = bus_txns[0]
 
+        pn, bt, ma, cycles, ic = todo
+
         # only the transaction that is selected gets to commit to new stage
-        self.caches[todo.pn].commit()
+        self.caches[todo.pn].commit(ma, ic)
 
         # let every other cache to respond to a bus txn
-        pn, bt, ma, cycles = todo
         cycles_to_block = cycles
         debug_snoop(pn, bt)
         for c in self.caches:
@@ -60,7 +64,8 @@ class Snoop():
                 self.num_invalidations += 1
             cycles_to_block = max(cycles_to_block, cycles)
 
-        for c in self.caches:
+        # todo = bus_txns[0]
+        for c in [self.caches[c.pn] for c in bus_txns]:
             c.block_for(cycles_to_block)
 
         if (cycles_to_block > 0):

@@ -19,8 +19,8 @@ STATE_MACHINE = {
         BUSRDX: (INVALID, False, 0),
     },
     SHARED: {
-        PRRD:(SHARED, None, 0),
-        PRWR: (MODIFIED, BUSRDX, 0),
+        PRRD:(SHARED, None, 1),
+        PRWR: (MODIFIED, BUSRDX, 1),
         BUSRD: (SHARED, False, 0),
         BUSRDX: (INVALID, False, 0),
     },
@@ -43,6 +43,8 @@ class CacheBlock():
         self.misses = 0
         self.private_access = 0
         self.shared_access = 0
+        self.pa = None
+        self.ba = None
 
     def step(self, event, origin=None):
         old_state = self.state
@@ -71,17 +73,8 @@ class CacheBlock():
         return snoop, cycles
 
     def processor_action(self, event):
-        # record hits vs misses
-        if self.state == INVALID:
-            self.misses += 1
-        else:
-            self.hits += 1
-
-        # record hits vs misses
-        if self.state == SHARED:
-            self.shared_access += 1
-        elif self.state == MODIFIED:
-            self.private_access += 1
+        self.ba = None
+        self.pa = event
 
         # invalid - prwr -> miss
         # invalid - prwr -> miss
@@ -92,12 +85,25 @@ class CacheBlock():
         return getattr(self, event.lower())()
 
     def bus_action(self, event, origin=None):
+        self.pa = None
+        self.ba = event
         return getattr(self, event.lower())(origin)
 
-    def commit(self):
+    def commit(self, ic):
+        current = self.state
+        nexts = self.next_state_to_commit
+
         if self.next_state_to_commit:
             self.state = self.next_state_to_commit
             self.next_state_to_commit = None
+
+        print('[%d] %d COMMITING: %s %s self.pa: %s self.ba: %s' %(self.cid, ic, current, nexts, self.pa, self.ba))
+
+        if self.pa and current == INVALID:
+            self.misses += 1
+
+        if self.pa and (current == SHARED or current == MODIFIED):
+            self.hits += 1
 
     def get_summary(self):
         return {

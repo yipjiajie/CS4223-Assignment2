@@ -71,9 +71,8 @@ class Cache():
         cache_block = self.cache_block(mem_addr)
         return cache_block.bus_action(event, origin)
 
-    def commit(self):
-        for c in self._cache:
-            c.commit()
+    def commit(self, ma, ic):
+        self.cache_block(ma).commit(ic)
 
     def get_summary(self):
         summaries = [c.get_summary() for c in self._cache]

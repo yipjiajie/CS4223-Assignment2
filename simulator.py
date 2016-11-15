@@ -2,7 +2,7 @@ from cache import Cache
 from snoop import Snoop, BusTxn
 from processor import Processor
 from msi_cache import MsiCache
-from debug import debug_bus_txn, debug_instr_pre, debug_stalls
+from debug import debug_p_tick_start, debug_bus_txn, debug_instr_pre, debug_stalls
 from constants import *
 
 
@@ -45,6 +45,7 @@ class Simulator():
                 debug_instr_pre(ic, p.pn, itype, p.cache.index(mem_addr), mem_addr)
 
                 if itype == OTHER:
+                    print('[%d] itype == other' % p.pn)
                     p.compute_for(mem_addr)
                     p.proceed()
                     continue
@@ -59,7 +60,7 @@ class Simulator():
 
                 debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
 
-                self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles))
+                self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
 
             p_proceed = self.snoop.tick()
             for pn in p_proceed:
