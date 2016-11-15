@@ -72,7 +72,11 @@ class Simulator():
 
                 debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
 
-                self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
+                if bus_txn == 'EVICT':
+                    p.proceed()
+                    self.snoop.block_on_evict()
+                else:
+                    self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
 
             p_proceed = self.snoop.tick()
             for pn in p_proceed:

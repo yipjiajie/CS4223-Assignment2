@@ -14,6 +14,9 @@ class Snoop():
         self.num_invalidations = 0
         self.cycles_to_block = 0
 
+    def block_on_evict(self):
+        self.cycles_to_block += 100
+
     def add_txn(self, txn):
         if txn is not None and txn.name is not None:
             self.txns.append(txn)

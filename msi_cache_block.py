@@ -45,6 +45,15 @@ class CacheBlock():
         self.shared_access = 0
         self.pa = None
         self.ba = None
+        self.next_tag = None
+
+    def reset(self):
+        self.state = INVALID
+        self.tag = None
+        self.next_state_to_commit = None
+        self.pa = None
+        self.ba = None
+        self.next_tag = None
 
     def step(self, event, origin=None):
         old_state = self.state
@@ -96,6 +105,10 @@ class CacheBlock():
         if self.next_state_to_commit:
             self.state = self.next_state_to_commit
             self.next_state_to_commit = None
+
+        if self.next_tag:
+            self.tag = self.next_tag
+            self.tag = None
 
         if self.pa and current == INVALID:
             self.misses += 1

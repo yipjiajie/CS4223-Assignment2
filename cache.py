@@ -24,6 +24,7 @@ class Cache():
 
         self.cache_sets = self.init_cache_sets(self.id)
         self._blocked_for = 0
+        self.to_commit = None
 
     def init_cache_sets(self):
         return []
@@ -37,9 +38,11 @@ class Cache():
     def tag(self, mem_addr):
         return mem_addr >> (self.n_bits_offset + self.n_bits_index)
 
-    def cache_block(self, mem_addr):
-        """Get cache bock responsible for this memory address"""
+    def cache_set(self, mem_addr):
         return self.cache_sets[self.index(mem_addr)]
+
+    def cache_block(self, mem_addr):
+        return self.cache_sets[self.index(mem_addr)].find_block(self.tag(mem_addr))
 
     def tick(self):
         if self._blocked_for > 0:
@@ -58,8 +61,26 @@ class Cache():
         Returns bus_txn:
             the name of bus event triggered
         """
-        cache_block = self.cache_block(mem_addr)
-        return cache_block.processor_action(event)
+        cb = self.cache_block(mem_addr)
+        if cb:
+            return cb.processor_action(event)
+
+        cs = self.cache_set(mem_addr)
+        cb = cs.first_empty()
+        if cb:
+            cb.next_tag = self.tag(mem_addr)
+            cs.to_commit = cb
+            return cb.processor_action(event)
+        else:
+            # no empty cache block
+            cb = cs.evict()
+            cb.next_tag = self.tag(mem_addr)
+            cs.to_commit = cb
+
+            return 'EVICT', 100
+
+        cache_set = self.cache_set(mem_addr)
+        return cache_set.processor_action(event)
 
     def bus_action(self, event, mem_addr, origin):
         """Respond to a bus snoop action
@@ -68,11 +89,17 @@ class Cache():
             snoop is a boolean indicating if the cache block snooped this event
             cycles to block indicates cycles that the cache controll is blocked
         """
-        cache_block = self.cache_block(mem_addr)
-        return cache_block.bus_action(event, origin)
+        cb = self.cache_block(mem_addr)
+
+        if not cb:
+            return None, 0
+
+        return cb.bus_action(event, origin)
+        # cache_set = self.cache_set(mem_addr)
+        # return cache_set.bus_action(event, origin)
 
     def commit(self, ma, ic):
-        self.cache_block(ma).commit(ic)
+        self.cache_set(ma).commit(self.tag(ma), ic)
 
     def get_summary(self):
         summaries = [c.get_summary() for c in self.cache_sets]
