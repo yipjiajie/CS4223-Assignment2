@@ -30,7 +30,6 @@ class Snoop():
             return []
 
         if not self.txns:
-            print("NO SELF TXNS")
             return [c.id for c in self.caches]
 
         r = self.snoop(self.txns)

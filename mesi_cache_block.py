@@ -1,4 +1,4 @@
-# Implementation of MSI cache coherence protocol for a single
+# Implementation of MESI cache coherence protocol for a single
 # cache block
 
 from debug import debug_cache_block

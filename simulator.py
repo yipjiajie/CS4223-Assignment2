@@ -2,6 +2,7 @@ from cache import Cache
 from snoop import Snoop, BusTxn
 from processor import Processor
 from msi_cache import MsiCache
+from mesi_cache import MesiCache
 from debug import debug_p_tick_start, debug_bus_txn, debug_instr_pre, debug_stalls
 from constants import *
 
@@ -15,14 +16,18 @@ class Simulator():
             associativity,
             block_size):
         self.protocol = protocol
+        if self.protocol == 'msi':
+            cache_class = MsiCache
+        else:
+            cache_class = MesiCache
         self.caches = [
-            MsiCache(
+            cache_class(
                 int(cache_size),
                 int(associativity),
                 int(block_size),
-                i) for i in range(2)]
+                i) for i in range(4)]
         self.processors = [
-            Processor(input_file, i, self.caches[i]) for i in range(2)]
+            Processor(input_file, i, self.caches[i]) for i in range(4)]
         self.snoop = Snoop(self.caches)
 
     def simulate(self):
@@ -45,7 +50,6 @@ class Simulator():
                 debug_instr_pre(ic, p.pn, itype, p.cache.index(mem_addr), mem_addr)
 
                 if itype == OTHER:
-                    print('[%d] itype == other' % p.pn)
                     p.compute_for(mem_addr)
                     p.proceed()
                     continue
