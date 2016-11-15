@@ -6,20 +6,23 @@ from debug import debug_cache_block
 INVALID = 'invalid'
 SHARED = 'shared'
 MODIFIED = 'modified'
+EXCLUSIVE = 'exclusive'
 BUSRD = 'BusRd'
 BUSRDX = 'BusRdX'
 PRRD = 'PrRd'
+PRRDS = 'PrRdS'
 PRWR = 'PrWr'
 
 STATE_MACHINE = {
     INVALID: {
-        PRRD: (SHARED, BUSRD, 100),
+        PRRD: (EXCLUSIVE, BUSRD, 100),
+        PRRDS: (SHARED, BUSRD, 100),
         PRWR: (MODIFIED, BUSRDX, 100),
         BUSRD: (INVALID, False, 0),
         BUSRDX: (INVALID, False, 0),
     },
     SHARED: {
-        PRRD:(SHARED, None, 1),
+        PRRD: (SHARED, None, 1),
         PRWR: (MODIFIED, BUSRDX, 1),
         BUSRD: (SHARED, False, 0),
         BUSRDX: (INVALID, False, 0),
@@ -30,10 +33,17 @@ STATE_MACHINE = {
         BUSRD: (SHARED, True, 100),
         BUSRDX: (INVALID, True, 100),
     },
+    EXCLUSIVE: {
+        PRRD: (EXCLUSIVE, None, 0),
+        PRWR: (MODIFIED, None, 0),
+        BUSRD: (SHARED, None, 100),
+        BUSRDX: (INVALID, None, 100),
+    }
 }
 
 class CacheBlock():
-    def __init__(self, cache_id, block_id):
+    def __init__(self, cache, cache_id, block_id):
+        self.cache = cache
         self.cid = cache_id
         self.id = block_id
         self.state = INVALID
@@ -43,6 +53,15 @@ class CacheBlock():
         self.misses = 0
         self.private_access = 0
         self.shared_access = 0
+        self.pa = None
+        self.ba = None
+
+    def is_used(self):
+        return self.state == INVALID
+
+    def reset(self):
+        self.state = INVALID
+        self.next_state_to_commit = None
         self.pa = None
         self.ba = None
 
@@ -57,7 +76,14 @@ class CacheBlock():
         return (old_state, r[1], r[2])
 
     def prrd(self, origin=None):
-        self.state, bus_txn, cycles = self.step(PRRD)
+        self.cache.is_any_shared(self.id)
+        # find out if any other cache has exclusive or modified
+        # if so: then i go to shared
+        # otherwise i go to exclusive
+        if self.shared:
+            self.state, bus_txn, cycles = self.step(PRRDS)
+        else:
+            self.state, bus_txn, cycles = self.step(PRRD)
         return bus_txn, cycles
 
     def prwr(self, origin=None):

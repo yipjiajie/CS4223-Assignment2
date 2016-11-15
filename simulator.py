@@ -5,6 +5,7 @@ from msi_cache import MsiCache
 from mesi_cache import MesiCache
 from debug import debug_p_tick_start, debug_bus_txn, debug_instr_pre, debug_stalls
 from constants import *
+from shared_line import SharedLine
 
 
 class Simulator():
@@ -20,12 +21,19 @@ class Simulator():
             cache_class = MsiCache
         else:
             cache_class = MesiCache
+
         self.caches = [
             cache_class(
                 int(cache_size),
                 int(associativity),
                 int(block_size),
                 i) for i in range(4)]
+
+        if self.protocol == 'mesi':
+            shared_line = SharedLine(self.caches)
+            for c in self.caches:
+                c.set_shared_line(shared_line)
+
         self.processors = [
             Processor(input_file, i, self.caches[i]) for i in range(4)]
         self.snoop = Snoop(self.caches)
