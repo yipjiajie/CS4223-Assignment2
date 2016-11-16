@@ -33,7 +33,8 @@ STATE_MACHINE = {
 }
 
 class CacheBlock():
-    def __init__(self, assoc, block_id, pid):
+    def __init__(self, cache, assoc, block_id, pid):
+        self.cache = cache
         self.pid = pid
         self.cid = pid
         self.cache_set_index = block_id
@@ -50,6 +51,12 @@ class CacheBlock():
         self.pa = None
         self.ba = None
         self.next_tag = None
+
+    def should_flush(self):
+        return self.state == MODIFIED
+
+    def is_empty(self):
+        return self.state == INVALID
 
     def reset(self):
         self.state = INVALID

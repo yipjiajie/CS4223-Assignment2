@@ -42,9 +42,13 @@ STATE_MACHINE = {
 }
 
 class CacheBlock():
-    def __init__(self, cache, cache_id, block_id):
+    def __init__(self, cache, assoc, block_id, pid):
         self.cache = cache
-        self.cid = cache_id
+        self.pid = pid
+        self.cid = pid
+        self.cache_set_index = block_id
+        self.cache_block_index = assoc
+
         self.id = block_id
         self.state = INVALID
         self.tag = None
@@ -56,14 +60,19 @@ class CacheBlock():
         self.pa = None
         self.ba = None
 
-    def is_used(self):
+    def should_flush(self):
+        return self.state == MODIFIED
+
+    def is_empty(self):
         return self.state == INVALID
 
     def reset(self):
         self.state = INVALID
+        self.tag = None
         self.next_state_to_commit = None
         self.pa = None
         self.ba = None
+        self.next_tag = None
 
     def step(self, event, origin=None):
         old_state = self.state
@@ -100,13 +109,6 @@ class CacheBlock():
     def processor_action(self, event):
         self.ba = None
         self.pa = event
-
-        # invalid - prwr -> miss
-        # invalid - prwr -> miss
-        # shared - prrd -> hit
-        # shared - prwr -> hit
-        # modifed - prrd -> hit
-        # modifed - prwr -> hit
         return getattr(self, event.lower())()
 
     def bus_action(self, event, origin=None):
@@ -114,7 +116,7 @@ class CacheBlock():
         self.ba = event
         return getattr(self, event.lower())(origin)
 
-    def commit(self, ic):
+    def commit(self):
         current = self.state
         nexts = self.next_state_to_commit
 
