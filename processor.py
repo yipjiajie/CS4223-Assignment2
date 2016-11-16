@@ -14,6 +14,7 @@ class Processor():
         self.memory_access_cycles = 0
         self.ticks = 0
         self.total_compute = 0
+        self.num_cycles = len(self.instructions)
 
     def tick(self):
         self.ticks += 1
@@ -27,17 +28,20 @@ class Processor():
             self.cycle += 1
             return
 
-        elif self.ic >= len(self.instructions):
+        elif self.ic >= self.num_cycles:
             return True
 
         instr = self.instructions[self.ic]
-        ty, mem = instr.split()
+        ty = instr[0:1]
+        mem = instr[2:]
 
         return (self.ic, ty, mem)
 
     def proceed(self):
         if self.compute_for_cycles == 0:
             self.ic += 1
+            # if self.ic % 10000 == 0:
+            #     print('proceeding %s %s' % (self.pn, self.ic))
 
     def compute_for(self, cycles):
         self.total_compute += cycles

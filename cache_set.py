@@ -44,18 +44,16 @@ class CacheSet():
             self.to_commit = None
 
     def find_block(self, tag):
-        blocks = [b for b in self.cache_blocks if b.tag == tag]
-        if len(blocks) > 0:
-            return blocks[0]
-        else:
-            return None
+        for b in self.cache_blocks:
+            if b.tag == tag:
+                return b
+        return None
 
     def first_empty(self):
-        blocks = [b for b in self.cache_blocks if b.is_empty()]
-        if len(blocks) > 0:
-            return blocks[0]
-        else:
-            return None
+        for b in self.cache_blocks:
+            if b.is_empty():
+                return b
+        return None
 
     def evict(self):
         cb = self.lru.evict()

@@ -3,7 +3,7 @@ from snoop import Snoop, BusTxn
 from processor import Processor
 from msi_cache import MsiCache
 from mesi_cache import MesiCache
-from debug import debug_p_tick_start, debug_bus_txn, debug_instr_pre, debug_stalls
+from debug import debug_bus_txn, debug_instr_pre
 from constants import *
 from shared_line import SharedLine
 
@@ -55,7 +55,7 @@ class Simulator():
                 ic, itype, maddr = res
                 mem_addr = int(maddr, 16)
 
-                debug_instr_pre(ic, p.pn, itype, p.cache.index(mem_addr), mem_addr)
+                # debug_instr_pre(ic, p.pn, itype, p.cache.index(mem_addr), mem_addr)
 
                 if itype == OTHER:
                     p.compute_for(mem_addr)
@@ -68,14 +68,15 @@ class Simulator():
                 else:
                     raise Exception('Unknown instruction')
 
-                bus_txn, cycles = p.cache.processor_action(pa, mem_addr)
+                if self.snoop.cycles_to_block <= 0:
+                    bus_txn, cycles = p.cache.processor_action(pa, mem_addr)
 
-                debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
+                    # debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
 
-                if bus_txn == 'EVICT':
-                    self.snoop.block_on_evict()
-                else:
-                    self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
+                    if bus_txn == 'EVICT':
+                        self.snoop.block_on_evict()
+                    else:
+                        self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
 
             self.snoop.tick()
 

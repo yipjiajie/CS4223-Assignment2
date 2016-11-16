@@ -6,6 +6,7 @@ def log2(x): return int(log(x, 2))
 
 class Cache():
     def __init__(self, cache_size, assoc, block_size, pn):
+        self.snoop = None # will be set by snoop later
         self.processor = None
         self.id = pn
         self.pid = pn
@@ -55,11 +56,7 @@ class Cache():
 
     def block_for(self, cycles):
         self._blocked_for += cycles
-        debug_cache(self.id, cycles, self._blocked_for)
-
-    def deb(self, st):
-        if self.id == 0:
-            print(st)
+        # debug_cache(self.id, cycles, self._blocked_for)
 
     def processor_action(self, event, mem_addr):
         """Respond to a processor action.
@@ -108,6 +105,7 @@ class Cache():
     def commit(self):
         if self.cs_to_commit:
             self.cs_to_commit.commit()
+            self.cs_to_commit = None
 
     def get_summary(self):
         summaries = [c.get_summary() for c in self.cache_sets]

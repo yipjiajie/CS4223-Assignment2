@@ -15,12 +15,15 @@ class Snoop():
         self.cycles_to_block = 0
 
     def block_on_evict(self):
-        debug_snoop_block()
+        # debug_snoop_block()
         self.cycles_to_block += 100
 
     def add_txn(self, txn):
         if txn is not None and txn.name is not None:
             self.txns.append(txn)
+
+    def is_blocked(self):
+        return self.cycles_to_block > 0
 
     def tick(self):
         # tick 1 cycle on the snoop and returns the processors
@@ -35,7 +38,8 @@ class Snoop():
 
         if not self.txns:
             for c in self.caches:
-                c.commit()
+                if c.cs_to_commit:
+                    c.commit()
                 c.processor.proceed()
             return
 
@@ -44,7 +48,7 @@ class Snoop():
 
     def snoop(self, bus_txns):
         # pick 1 to respond to first (for simplicity always choose first)
-        debug_bus(bus_txns)
+        # debug_bus(bus_txns)
 
         todo = bus_txns[0]
 
@@ -58,7 +62,7 @@ class Snoop():
 
         # let every other cache to respond to a bus txn
         cycles_to_block = cycles
-        debug_snoop(pn, bt)
+        # debug_snoop(pn, bt)
         for c in self.caches:
             if c.id == pn:
                 continue
