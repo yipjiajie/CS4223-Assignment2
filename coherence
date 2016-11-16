@@ -3,27 +3,27 @@
 import sys
 from simulator import Simulator
 
-Simulator(
-    'msi',
-    'test1',
-    '1024',
-    '1',
-    '16'
-    ).simulate()
+# Simulator(
+#     'msi',
+#     'test1',
+#     '1024',
+#     '1',
+#     '16'
+#     ).simulate()
 
 # read command line args in this format
 # coherence “protocol” “input_file” “cache_size” “associativity” “block_size”
-# if len(sys.argv) != 6:
-#     print("Wrong number of arguments, usage:")
-#     print("    coherence 'protocol' 'input_file' 'cache_size' 'associativity' 'block_size'")
-#     sys.exit(2)
+if len(sys.argv) != 6:
+    print("Wrong number of arguments, usage:")
+    print("    coherence 'protocol' 'input_file' 'cache_size' 'associativity' 'block_size'")
+    sys.exit(2)
 
-# _, protocol, input_file, cache_size, associativity, block_size = sys.argv
+_, protocol, input_file, cache_size, associativity, block_size = sys.argv
 
-# print(Simulator(
-#     protocol,
-#     input_file,
-#     cache_size,
-#     associativity,
-#     block_size
-#     ).simulate())
+print(Simulator(
+    protocol,
+    input_file,
+    cache_size,
+    associativity,
+    block_size
+    ).simulate())
