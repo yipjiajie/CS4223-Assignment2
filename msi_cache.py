@@ -41,12 +41,10 @@ class CacheSet():
         }
         return summary
 
-    def commit(self, tag, ic):
-        if self.to_commit is None:
-            raise Exception('tomcommit is none')
-        else:
+    def commit(self):
+        if self.to_commit:
             self.lru.use(self.to_commit)
-            self.to_commit.commit(ic, tag)
+            self.to_commit.commit()
             self.to_commit = None
 
     def find_block(self, tag):

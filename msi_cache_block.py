@@ -88,13 +88,6 @@ class CacheBlock():
     def processor_action(self, event):
         self.ba = None
         self.pa = event
-
-        # invalid - prwr -> miss
-        # invalid - prwr -> miss
-        # shared - prrd -> hit
-        # shared - prwr -> hit
-        # modifed - prrd -> hit
-        # modifed - prwr -> hit
         return getattr(self, event.lower())()
 
     def bus_action(self, event, origin=None):
@@ -102,7 +95,7 @@ class CacheBlock():
         self.ba = event
         return getattr(self, event.lower())(origin)
 
-    def commit(self, ic, tag):
+    def commit(self):
         current = self.state
         nexts = self.next_state_to_commit
 
@@ -110,7 +103,8 @@ class CacheBlock():
             self.state = self.next_state_to_commit
             self.next_state_to_commit = None
 
-        self.tag = tag
+        self.tag = self.next_tag
+        self.next_tag = None
 
         if self.pa and current == INVALID:
             self.misses += 1

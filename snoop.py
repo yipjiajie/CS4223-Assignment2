@@ -35,6 +35,7 @@ class Snoop():
 
         if not self.txns:
             for c in self.caches:
+                c.commit()
                 c.processor.proceed()
             return
 
@@ -50,7 +51,7 @@ class Snoop():
         pn, bt, ma, cycles, ic = todo
 
         # only the transaction that is selected gets to commit to new stage
-        self.caches[todo.pn].commit(ma, ic)
+        self.caches[todo.pn].commit()
 
         # processor of the cache that is chosen to be committed can proceed
         self.caches[todo.pn].processor.proceed()

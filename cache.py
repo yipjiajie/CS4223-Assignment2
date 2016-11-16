@@ -68,8 +68,10 @@ class Cache():
             the name of bus event triggered
         """
         cs = self.cache_set(mem_addr)
+        self.cs_to_commit = cs
 
         cb = self.cache_block(mem_addr)
+        # found cache block with same tag
         if cb:
             cs.to_commit = cb
             return cb.processor_action(event)
@@ -103,8 +105,9 @@ class Cache():
         # cache_set = self.cache_set(mem_addr)
         # return cache_set.bus_action(event, origin)
 
-    def commit(self, ma, ic):
-        self.cache_set(ma).commit(self.tag(ma), ic)
+    def commit(self):
+        if self.cs_to_commit:
+            self.cs_to_commit.commit()
 
     def get_summary(self):
         summaries = [c.get_summary() for c in self.cache_sets]
