@@ -33,8 +33,11 @@ STATE_MACHINE = {
 }
 
 class CacheBlock(BaseCacheBlock):
-    def state_machine(self):
-        return STATE_MACHINE
+    PRIVATE_STATES = [MODIFIED]
+    SHARED_STATES = [SHARED]
+    HAS = [MODIFIED, SHARED]
+    STATE_MACHINE = STATE_MACHINE
+    INITIAL_STATE = INVALID
 
     def initial_state(self):
         return INVALID

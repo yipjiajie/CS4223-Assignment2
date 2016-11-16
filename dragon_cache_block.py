@@ -66,8 +66,11 @@ STATE_MACHINE = {
 }
 
 class CacheBlock(BaseCacheBlock):
-    def state_machine(self):
-        return STATE_MACHINE
+    PRIVATE_STATES = [EXCLUSIVE, MODIFIED]
+    SHARED_STATES = [SHARED_CLEAN, SHARED_MODIFIED]
+    HAS = [EXCLUSIVE, MODIFIED, SHARED_CLEAN, SHARED_MODIFIED]
+    STATE_MACHINE = STATE_MACHINE
+    INITIAL_STATE = INVALID
 
     def initial_state(self):
         return INVALID
@@ -77,9 +80,6 @@ class CacheBlock(BaseCacheBlock):
 
     def is_empty(self):
         return self.state == INVALID
-
-    def shared_states(self):
-        return [MODIFIED, SHARED_CLEAN, SHARED_MODIFIED]
 
     def prrd(self, origin=None):
         if self.state == INVALID and self.is_any_shared():

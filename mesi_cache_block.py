@@ -43,8 +43,11 @@ STATE_MACHINE = {
 }
 
 class CacheBlock(BaseCacheBlock):
-    def state_machine(self):
-        return STATE_MACHINE
+    PRIVATE_STATES = [MODIFIED, EXCLUSIVE]
+    SHARED_STATES = [SHARED]
+    HAS = [EXCLUSIVE, MODIFIED, SHARED]
+    STATE_MACHINE = STATE_MACHINE
+    INITIAL_STATE = INVALID
 
     def initial_state(self):
         return INVALID
@@ -54,9 +57,6 @@ class CacheBlock(BaseCacheBlock):
 
     def is_empty(self):
         return self.state == INVALID
-
-    def shared_states(self):
-        return [MODIFIED, SHARED]
 
     def prrd(self, origin=None):
         # find out if any other cache has exclusive or modified

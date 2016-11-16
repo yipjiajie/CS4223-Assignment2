@@ -30,6 +30,7 @@ class Processor():
             return
 
         if self.ic >= self.num_cycles:
+            print("PROCESSOR %d DONE!" % self.pn)
             self.done = True
             return True
 
@@ -40,6 +41,9 @@ class Processor():
         return (self.ic, ty, mem)
 
     def proceed(self):
+        if self.done:
+            return
+
         if self.compute_for_cycles == 0:
             self.ic += 1
             if self.ic % 1000 == 0:

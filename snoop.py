@@ -1,4 +1,5 @@
 from collections import namedtuple
+import random
 
 from debug import debug_bus, debug_snoop, debug_snoop_block
 
