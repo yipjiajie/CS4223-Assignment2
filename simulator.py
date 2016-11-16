@@ -27,7 +27,7 @@ class Simulator():
                 int(cache_size),
                 int(associativity),
                 int(block_size),
-                i) for i in range(4)]
+                i) for i in range(1)]
 
         if self.protocol == 'mesi':
             shared_line = SharedLine(self.caches)
@@ -35,7 +35,7 @@ class Simulator():
                 c.set_shared_line(shared_line)
 
         self.processors = [
-            Processor(input_file, i, self.caches[i]) for i in range(4)]
+            Processor(input_file, i, self.caches[i]) for i in range(1)]
         self.snoop = Snoop(self.caches)
 
     def simulate(self):

@@ -33,8 +33,12 @@ STATE_MACHINE = {
 }
 
 class CacheBlock():
-    def __init__(self, cache_id, block_id):
-        self.cid = cache_id
+    def __init__(self, assoc, block_id, pid):
+        self.pid = pid
+        self.cid = pid
+        self.cache_set_index = block_id
+        self.cache_block_index = assoc
+
         self.id = block_id
         self.state = INVALID
         self.tag = None
@@ -62,7 +66,7 @@ class CacheBlock():
         # self.state = r[0]
         self.next_state_to_commit = r[0]
         debug_cache_block(
-            self.cid, self.id, old_state, event, self.next_state_to_commit, origin)
+            self.pid, self.cache_set_index, self.cache_block_index, old_state, event, self.next_state_to_commit, origin)
         return (old_state, r[1], r[2])
 
     def prrd(self, origin=None):

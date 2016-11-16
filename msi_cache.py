@@ -24,10 +24,10 @@ class LRUEviction():
 
 
 class CacheSet():
-    def __init__(self, cache, assoc, i):
+    def __init__(self, cache, assoc, block_id, pid):
         self.cache = cache
         self.cache_blocks =  [
-            CacheBlock(assoc, i)
+            CacheBlock(assoc, block_id, pid)
             for i in range(assoc)
         ]
         self.to_commit = None
@@ -78,9 +78,9 @@ class CacheSet():
 
 
 class MsiCache(Cache):
-    def init_cache_sets(self, cache_id):
+    def init_cache_sets(self, pid):
         return [
 
-            CacheSet(self, self.assoc, i)
+            CacheSet(self, self.assoc, i, pid)
             for i in range(self.n_blocks)
         ]

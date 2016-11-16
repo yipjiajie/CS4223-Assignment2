@@ -36,7 +36,6 @@ class Processor():
         return (self.ic, ty, mem)
 
     def proceed(self):
-        print('PROCEED : %s', self.pn)
         if self.compute_for_cycles == 0:
             self.ic += 1
 

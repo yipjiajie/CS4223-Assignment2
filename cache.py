@@ -8,6 +8,7 @@ class Cache():
     def __init__(self, cache_size, assoc, block_size, pn):
         self.processor = None
         self.id = pn
+        self.pid = pn
         self.cache_size = cache_size # number of bytes
         self.assoc = assoc
         self.block_size = block_size # number of bytes
@@ -23,11 +24,11 @@ class Cache():
         self.offset_mask = int(pow(2, self.n_bits_offset)) - 1
         self.index_mask = int(pow(2, self.n_bits_index)) - 1
 
-        self.cache_sets = self.init_cache_sets(self.id)
+        self.cache_sets = self.init_cache_sets(self.pid)
         self._blocked_for = 0
         self.to_commit = None
 
-    def init_cache_sets(self):
+    def init_cache_sets(self, cid):
         return []
 
     def offset(self, mem_addr):
@@ -85,9 +86,6 @@ class Cache():
             cs.to_commit = cb
 
             return 'EVICT', cycles
-
-        cache_set = self.cache_set(mem_addr)
-        return cache_set.processor_action(event)
 
     def bus_action(self, event, mem_addr, origin):
         """Respond to a bus snoop action

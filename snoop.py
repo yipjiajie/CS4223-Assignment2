@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from debug import debug_bus, debug_snoop
+from debug import debug_bus, debug_snoop, debug_snoop_block
 
 BusTxn = namedtuple('BusTxn', ['pn', 'name', 'mem_addr', 'cycles', 'ic'])
 
@@ -15,6 +15,7 @@ class Snoop():
         self.cycles_to_block = 0
 
     def block_on_evict(self):
+        debug_snoop_block()
         self.cycles_to_block += 100
 
     def add_txn(self, txn):
