@@ -48,7 +48,8 @@ class Snoop():
         # pick 1 to respond to first (for simplicity always choose first)
         # debug_bus(bus_txns)
 
-        todo = bus_txns[0]
+        sel = random.randrange(len(bus_txns))
+        todo = bus_txns[sel]
 
         pn, bt, ma, cycles, ic = todo
 
