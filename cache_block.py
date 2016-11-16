@@ -32,6 +32,9 @@ class BaseCacheBlock():
     def is_empty(self):
         raise Exception('should be overwritten')
 
+    def shared_states(self):
+        raise Exception('should be overwritten')
+
     def reset(self):
         self.state = self.initial_state()
         self.tag = None
@@ -87,4 +90,5 @@ class BaseCacheBlock():
         self.next_tag = None
 
     def is_any_shared(self):
-        return self.cache.is_any_shared(self.cache_set_index, self.cache_block_index)
+        return self.cache.is_any_shared(
+            self.cache_set_index, self.cache_block_index, self.shared_states())

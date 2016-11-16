@@ -42,8 +42,8 @@ class Processor():
     def proceed(self):
         if self.compute_for_cycles == 0:
             self.ic += 1
-            # if self.ic % 10000 == 0:
-            #     print('proceeding %s %s' % (self.pn, self.ic))
+            if self.ic % 1000 == 0:
+                print('proceeding %s %s' % (self.pn, self.ic))
 
     def compute_for(self, cycles):
         self.total_compute += cycles

@@ -55,6 +55,9 @@ class CacheBlock(BaseCacheBlock):
     def is_empty(self):
         return self.state == INVALID
 
+    def shared_states(self):
+        return [MODIFIED, SHARED]
+
     def prrd(self, origin=None):
         # find out if any other cache has exclusive or modified
         # if so: then i go to shared
