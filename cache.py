@@ -51,9 +51,6 @@ class Cache():
         if self._blocked_for > 0:
             self._blocked_for -= 1
 
-    def is_blocked(self):
-        return self._blocked_for > 0
-
     def block_for(self, cycles):
         self._blocked_for += cycles
         # debug_cache(self.id, cycles, self._blocked_for)

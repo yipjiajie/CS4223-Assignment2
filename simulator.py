@@ -2,6 +2,7 @@ from cache import Cache
 from snoop import Snoop, BusTxn
 from processor import Processor
 from msi_cache import MsiCache
+from dragon_cache import DragonCache
 from mesi_cache import MesiCache
 from debug import debug_bus_txn, debug_instr_pre
 from constants import *
@@ -21,6 +22,8 @@ class Simulator():
             cache_class = MsiCache
         elif self.protocol == 'mesi':
             cache_class = MesiCache
+        elif self.protocol == 'dragon':
+            cache_class = DragonCache
 
         self.caches = [
             cache_class(
@@ -29,7 +32,7 @@ class Simulator():
                 int(block_size),
                 i) for i in range(1)]
 
-        if self.protocol == 'mesi':
+        if self.protocol == 'mesi' or self.protocol == 'dragon':
             shared_line = SharedLine(self.caches)
             for c in self.caches:
                 c.set_shared_line(shared_line)
@@ -43,6 +46,10 @@ class Simulator():
 
         while not all(done):
             for p in self.processors:
+
+                if p.done:
+                    continue
+
                 res = p.tick()
 
                 if res is None: # processor doing some compute or cache blocked
@@ -70,8 +77,6 @@ class Simulator():
 
                 if self.snoop.cycles_to_block <= 0:
                     bus_txn, cycles = p.cache.processor_action(pa, mem_addr)
-
-                    # debug_bus_txn(ic, p.pn, p.cache.index(mem_addr), bus_txn, mem_addr)
 
                     if bus_txn == 'EVICT':
                         self.snoop.block_on_evict()

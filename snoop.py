@@ -22,9 +22,6 @@ class Snoop():
         if txn is not None and txn.name is not None:
             self.txns.append(txn)
 
-    def is_blocked(self):
-        return self.cycles_to_block > 0
-
     def tick(self):
         # tick 1 cycle on the snoop and returns the processors
         # that are allowed to proceed with their instructions
