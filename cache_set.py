@@ -20,14 +20,17 @@ class LRUEviction():
         return min_member
 
 class CacheSet():
-    def __init__(self, cache_block_class, cache, assoc, block_id, pid):
+    def __init__(self, cache_block_class, cache, assoc, set_id, pid):
         self.cache = cache
         self.cache_blocks =  [
-            cache_block_class(cache, assoc, block_id, pid)
+            cache_block_class(cache, i, set_id, pid)
             for i in range(assoc)
         ]
         self.to_commit = None
         self.lru = LRUEviction(self.cache_blocks)
+
+    def block_by_index(self, block_index):
+        return self.cache_blocks[block_index]
 
     def get_summary(self):
         summaries = [c.get_summary() for c in self.cache_blocks]

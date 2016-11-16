@@ -59,7 +59,7 @@ class CacheBlock(BaseCacheBlock):
         # find out if any other cache has exclusive or modified
         # if so: then i go to shared
         # otherwise i go to exclusive
-        if self.state == INVALID and self.cache.is_any_shared(self.id):
+        if self.state == INVALID and self.is_any_shared():
             self.state, bus_txn, cycles = self.step(PRRDS)
         else:
             self.state, bus_txn, cycles = self.step(PRRD)

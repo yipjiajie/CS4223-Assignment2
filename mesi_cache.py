@@ -12,11 +12,9 @@ class MesiCache(Cache):
     def set_shared_line(self, shared_line):
         self.shared_line = shared_line
 
-    def is_any_shared(self, block_id):
+    def is_any_shared(self, set_id, block_id):
         for c in self.shared_line.other_caches(self.id):
-            if c.has_block(block_id):
+            if self.cache_sets[set_id].block_by_index(block_id) in [MODIFIED, EXCLUSIVE]:
                 return True
         return False
 
-    def has_block(self, block_id):
-        return self._cache[block_id].state in [MODIFIED, EXCLUSIVE]

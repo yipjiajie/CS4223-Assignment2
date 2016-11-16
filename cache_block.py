@@ -1,14 +1,14 @@
 from debug import debug_cache_block
 
 class BaseCacheBlock():
-    def __init__(self, cache, assoc, block_id, pid):
+    def __init__(self, cache, assoc, set_id, pid):
         self.cache = cache
         self.pid = pid
         self.cid = pid
-        self.cache_set_index = block_id
+        self.cache_set_index = set_id
         self.cache_block_index = assoc
 
-        self.id = block_id
+        self.id = set_id
         self.state = self.initial_state()
         self.tag = None
         self.next_state_to_commit = None
@@ -86,3 +86,5 @@ class BaseCacheBlock():
         self.tag = self.next_tag
         self.next_tag = None
 
+    def is_any_shared(self):
+        return self.cache.is_any_shared(self.cache_set_index, self.cache_block_index)
