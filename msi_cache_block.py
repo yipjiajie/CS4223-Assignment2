@@ -25,8 +25,8 @@ STATE_MACHINE = {
         BUSRDX: (INVALID, False, 0),
     },
     MODIFIED: {
-        PRRD: (MODIFIED, None, 0),
-        PRWR: (MODIFIED, None, 0),
+        PRRD: (MODIFIED, None, 1),
+        PRWR: (MODIFIED, None, 1),
         BUSRD: (SHARED, True, 100),
         BUSRDX: (INVALID, True, 100),
     },

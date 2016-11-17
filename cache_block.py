@@ -62,15 +62,19 @@ class BaseCacheBlock():
         }
 
     def commit(self):
+        if not self.next_state_to_commit:
+            return
         current = self.state
         nexts = self.next_state_to_commit
 
         # stats
         if self.pa:
+
             if current == self.INITIAL_STATE:
                 self.misses += 1
             else:
                 self.hits += 1
+
 
             if current in self.PRIVATE_STATES:
                 self.private_access += 1

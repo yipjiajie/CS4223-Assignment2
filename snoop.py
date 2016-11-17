@@ -38,6 +38,8 @@ class Snoop():
         if not self.txns:
             for p in p_with_mem:
                 p.proceed()
+                p.cache.commit()
+                p.cycle += 1
             return
 
         r = self.snoop(self.txns)

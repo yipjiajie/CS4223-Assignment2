@@ -67,6 +67,7 @@ class Cache():
         cb = self.cache_block(mem_addr)
         # found cache block with same tag
         if cb:
+            cb.next_tag = self.tag(mem_addr)
             cs.to_commit = cb
             return cb.processor_action(event)
 
