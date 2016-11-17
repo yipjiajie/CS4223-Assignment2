@@ -94,6 +94,10 @@ class Simulator():
             print(p.get_summary())
             print(p.cache.get_summary())
 
-        print(self.snoop.get_summary())
+        n_words = self.processors[0].cache.n_words_in_block
+        snoop_summary = self.snoop.get_summary()
+        snoop_summary['traffic'] = snoop_summary['traffic'] * n_words * 4 # 1 word is 4 bytes
+        print(max(p.get_summary()['cycles'] for p in self.processors))
+        print(snoop_summary)
 
         return 'Done'

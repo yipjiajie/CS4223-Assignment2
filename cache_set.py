@@ -38,6 +38,7 @@ class CacheSet():
         summary = {
                 stat: sum(s[stat] for s in summaries) for stat in STATS
         }
+        summary['miss_rate'] = summary['misses'] / (summary['misses'] + summary['hits'])
         return summary
 
     def commit(self):
