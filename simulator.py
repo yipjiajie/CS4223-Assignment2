@@ -45,6 +45,7 @@ class Simulator():
         done = [False] * len(self.processors)
 
         while not all(done):
+            p_with_mem = []
             for p in self.processors:
 
                 if p.done:
@@ -66,11 +67,13 @@ class Simulator():
 
                 if itype == OTHER:
                     p.compute_for(mem_addr)
-                    # p.proceed()
+                    p.proceed()
                     continue
                 elif itype == LOAD:
+                    p_with_mem.append(p)
                     pa = PrRd
                 elif itype == STORE:
+                    p_with_mem.append(p)
                     pa = PrWr
                 else:
                     raise Exception('Unknown instruction')
@@ -83,7 +86,8 @@ class Simulator():
                     else:
                         self.snoop.add_txn(BusTxn(p.pn, bus_txn, mem_addr, cycles, p.ic))
 
-            self.snoop.tick()
+            self.snoop.tick(p_with_mem)
+            p_with_mem = []
 
         for p in self.processors:
             print('=== Summary for processor %s ===' % p.pn)

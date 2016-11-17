@@ -24,7 +24,7 @@ class Snoop():
         if txn is not None and txn.name is not None:
             self.txns.append(txn)
 
-    def tick(self):
+    def tick(self, p_with_mem):
         # tick 1 cycle on the snoop and returns the processors
         # that are allowed to proceed with their instructions
         # the other processors are not allowed to proceed
@@ -36,10 +36,8 @@ class Snoop():
             return
 
         if not self.txns:
-            for c in self.caches:
-                if c.cs_to_commit:
-                    c.commit()
-                c.processor.proceed()
+            for p in p_with_mem:
+                p.proceed()
             return
 
         r = self.snoop(self.txns)
