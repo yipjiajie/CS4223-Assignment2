@@ -14,6 +14,7 @@ class Snoop():
         self.traffic = 0
         self.num_invalidations = 0
         self.cycles_to_block = 0
+        self.last_sel = 0
 
     def block_on_evict(self):
         # debug_snoop_block()
@@ -48,7 +49,8 @@ class Snoop():
         # pick 1 to respond to first (for simplicity always choose first)
         # debug_bus(bus_txns)
 
-        sel = random.randrange(len(bus_txns))
+        sel = (self.last_sel + 1) % (len(bus_txns))
+        self.last_sel = sel
         todo = bus_txns[sel]
 
         pn, bt, ma, cycles, ic = todo
