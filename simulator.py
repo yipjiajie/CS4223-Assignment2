@@ -66,7 +66,7 @@ class Simulator():
 
                 if itype == OTHER:
                     p.compute_for(mem_addr)
-                    p.proceed()
+                    # p.proceed()
                     continue
                 elif itype == LOAD:
                     pa = PrRd

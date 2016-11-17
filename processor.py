@@ -20,10 +20,10 @@ class Processor():
         if self.done:
             return
 
-        if self.compute_for_cycles > 0:
-            self.compute_for_cycles -= 1
-            self.cycle += 1
-            return
+        # if self.compute_for_cycles > 0:
+        #     self.compute_for_cycles -= 1
+        #     self.cycle += 1
+        #     return
 
         if self.cache._blocked_for > 0:
             self.cycle += 1
@@ -44,14 +44,15 @@ class Processor():
         if self.done:
             return
 
-        if self.compute_for_cycles == 0:
-            self.ic += 1
-            if self.ic % 1000 == 0:
-                print('proceeding %s %s' % (self.pn, self.ic))
+        # if self.compute_for_cycles == 0:
+        self.ic += 1
+        if self.ic % 1000 == 0:
+            print('proceeding %s %s' % (self.pn, self.ic))
 
     def compute_for(self, cycles):
         self.total_compute += cycles
-        self.compute_for_cycles += cycles
+        self.cycle += cycles
+        # self.compute_for_cycles += cycles
 
     def get_summary(self):
         return {
