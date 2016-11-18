@@ -37,8 +37,8 @@ STATE_MACHINE = {
     EXCLUSIVE: {
         PRRD: (EXCLUSIVE, None, 0),
         PRWR: (MODIFIED, None, 0),
-        BUSRD: (SHARED, None, 100),
-        BUSRDX: (INVALID, None, 100),
+        BUSRD: (SHARED, True, 100),
+        BUSRDX: (INVALID, True, 100),
     }
 }
 
