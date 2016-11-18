@@ -112,9 +112,9 @@ class Cache():
     def get_summary(self):
         summaries = [c.get_summary() for c in self.cache_sets]
         STATS = ['hits', 'misses', 'shared_access', 'private_access']
-        summary = {
-            stat: sum(s[stat] for s in summaries) for stat in STATS
-        }
+        summary = {}
+        for stat in STATS:
+            summary[stat] = sum(s[stat] for s in summaries)
         return summary
 
     def set_shared_line(self, shared_line):
