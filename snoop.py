@@ -73,7 +73,7 @@ class Snoop():
             # can only be a flush
             # flush blocks the entire bus for x cycles
             # assume that in this x cycles ma gets into pn's cache too
-            if cycles > 0:
+            if snoop or cycles > 0:
                 self.num_invalidations += 1
                 if snoop:
                     c.commit()
