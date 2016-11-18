@@ -1,9 +1,9 @@
 class LRUEviction():
     def __init__(self, members):
         self.members = members
-        self.last_count = {
-            m: 0 for m in members
-        }
+        self.last_count = {}
+        for m in members:
+            self.last_count[m] = 0
         self.cur_max = 0
 
     def use(self, m):
