@@ -22,7 +22,7 @@ PRWR_M_TO_M = 'prwr_m_to_m'
 BUSRD = 'BusRd'
 PRRD = 'PrRd'
 PRWR = 'PrWr'
-BUSUPD = ' BusUpd'
+BUSUPD = 'BusUpd'
 
 
 STATE_MACHINE = {
