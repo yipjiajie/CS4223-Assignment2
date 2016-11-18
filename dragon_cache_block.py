@@ -27,10 +27,10 @@ BUSUPD = ' BusUpd'
 
 STATE_MACHINE = {
     INVALID: {
-        PRRD_TO_SC: (SHARED_CLEAN, None, 100),
-        PRRD_TO_E: (EXCLUSIVE, None, 100),
-        PRWR_I_TO_M: (MODIFIED, None, 100),
-        PRWR_I_TO_SM: (SHARED_MODIFIED, None, 100),
+        PRRD_TO_SC: (SHARED_CLEAN, BUSRD, 100),
+        PRRD_TO_E: (EXCLUSIVE, BUSRD, 100),
+        PRWR_I_TO_M: (MODIFIED, BUSRD, 100),
+        PRWR_I_TO_SM: (SHARED_MODIFIED, BUSRD, 100),
 
         BUSRD: (INVALID, False, 0),
     },
@@ -107,4 +107,8 @@ class CacheBlock(BaseCacheBlock):
 
     def busrd(self, origin):
         self.state, snoop, cycles = self.step(BUSRD, origin)
+        return snoop, cycles
+
+    def busupd(self, origin):
+        self.state, snoop, cycles = self.step(BUSUPD, origin)
         return snoop, cycles
