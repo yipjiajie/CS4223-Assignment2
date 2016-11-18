@@ -91,14 +91,18 @@ class Cache():
             snoop is a boolean indicating if the cache block snooped this event
             cycles to block indicates cycles that the cache controll is blocked
         """
+
+        cs = self.cache_set(mem_addr)
         cb = self.cache_block(mem_addr)
 
         if not cb:
             return None, 0
 
-        return cb.bus_action(event, origin)
-        # cache_set = self.cache_set(mem_addr)
-        # return cache_set.bus_action(event, origin)
+        snoop, cycles = cb.bus_action(event, origin)
+        if snoop:
+            self.cs_to_commit = cs
+            cs.to_commit = cb
+        return snoop, cycles
 
     def commit(self):
         if self.cs_to_commit:

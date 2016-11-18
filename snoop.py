@@ -75,6 +75,8 @@ class Snoop():
             # assume that in this x cycles ma gets into pn's cache too
             if cycles > 0:
                 self.num_invalidations += 1
+                if snoop:
+                    c.commit()
             cycles_to_block = max(cycles_to_block, cycles)
 
         # todo = bus_txns[0]
