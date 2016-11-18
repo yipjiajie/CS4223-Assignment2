@@ -1,3 +1,4 @@
+from __future__ import print_function
 from cache import Cache
 from snoop import Snoop, BusTxn
 from processor import Processor
