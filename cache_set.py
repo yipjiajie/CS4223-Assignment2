@@ -35,9 +35,9 @@ class CacheSet():
     def get_summary(self):
         summaries = [c.get_summary() for c in self.cache_blocks]
         STATS = ['hits', 'misses', 'shared_access', 'private_access']
-        summary = {
-                stat: sum(s[stat] for s in summaries) for stat in STATS
-        }
+        summary = {}
+        for stat in STATS:
+            summary[stat] = sum(s[stat] for s in summaries)
         if summary['misses'] + summary['hits'] > 0:
             summary['miss_rate'] = summary['misses'] / (summary['misses'] + summary['hits'])
         return summary
