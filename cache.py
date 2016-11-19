@@ -100,6 +100,7 @@ class Cache():
 
         snoop, cycles = cb.bus_action(event, origin)
         if snoop:
+            cb.next_tag = self.tag(mem_addr)
             self.cs_to_commit = cs
             cs.to_commit = cb
         return snoop, cycles
