@@ -14,7 +14,7 @@ class Snoop():
         self.traffic = 0
         self.num_invalidations = 0
         self.cycles_to_block = 0
-        self.last_sel = 0
+        self.last_sel = -1
 
     def block_on_evict(self):
         # debug_snoop_block()
