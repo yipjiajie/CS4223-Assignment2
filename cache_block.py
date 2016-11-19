@@ -39,9 +39,6 @@ class BaseCacheBlock():
         r = self.STATE_MACHINE[self.state][event]
         self.next_state_to_commit = r[0]
         return (old_state, r[1], r[2])
-        # self.state = r[0]
-        # debug_cache_block(
-            # self.pid, self.cache_set_index, self.cache_block_index, old_state, event, self.next_state_to_commit, origin)
 
     def processor_action(self, event):
         self.ba = None
